@@ -3,9 +3,7 @@ A .gpx file viewer plugin for Total Commander (TC)
 
 ## Overview
 This is a TC lister plugin to preview .gpx format file of cycling tracks on Baidu map.
-gpx is the defalut format of [Xingzhe行者](http://imxingzhe.com/) Android App.  
-C# webbrowser control is used for map display.  Javascript in map.html draw the polylines and Start/End point.  
-.Net Plugin Interface play a very important role to communicate between unmanaged code(c++/delphi) and managed code (C#). It is a fantastic software with very detail document. Thank the author Oleg Yuvashev.
+gpx is the defalut format of [Xingzhe行者](http://imxingzhe.com/) Android App. C# webbrowser control is used for map display.  Javascript in map.html draw the polylines and Start/End point. .Net Plugin Interface play a very important role to communicate between unmanaged code(c++/delphi) and managed code (C#). It is a fantastic software with very detail document. Thank the author Oleg Yuvashev.
 
 ## Tool Chain
 1. [Visual Studio 2019](https://visualstudio.microsoft.com/vs/)
