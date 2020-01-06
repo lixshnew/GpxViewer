@@ -35,7 +35,7 @@ namespace OY.TotalCommander.TcPlugins.GpxViewer
             
             return lc;
         }
-        /*
+        
         public override ListerResult LoadNext(object control, string fileToLoad, ShowFlags showFlags)
         {
             return ListerResult.OK;
@@ -43,7 +43,7 @@ namespace OY.TotalCommander.TcPlugins.GpxViewer
 
         public override void CloseWindow(object control)
         {
-
+            lc.Dispose(); // make focus back to TC , strange!
         }
 
         public override ListerResult SearchText(object control, string searchString, SearchParameter searchParameter)
@@ -85,6 +85,6 @@ namespace OY.TotalCommander.TcPlugins.GpxViewer
         {
 
         }
-        */
+        
     }
 }

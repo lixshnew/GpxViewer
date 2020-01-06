@@ -16,7 +16,8 @@ namespace OY.TotalCommander.TcPlugins.GpxViewer
     //[System.Runtime.InteropServices.ComVisibleAttribute(true)]
     public partial class ListerControl: UserControl
     {
-        string fileName;
+        
+        private string fileName;
 
         public int i = 0;
         public int j = 0;
@@ -105,11 +106,20 @@ namespace OY.TotalCommander.TcPlugins.GpxViewer
         {
             fileName = name;
             InitializeComponent();
+            this.webBrowser.Document.Click += new System.Windows.Forms.HtmlElementEventHandler(this.webBrowser_click);
         }
 
         private void webBrowser_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
         {
             //MessageBox.Show("webBrower load done");
+            webBrowser.Focus();
+            
+        }
+
+        private void  webBrowser_click(object sender, HtmlElementEventArgs e)
+        {
+            webBrowser.Focus();
+           
         }
 
         private void ListerControl_Load(object sender, EventArgs e)
