@@ -1,0 +1,7 @@
+V1.1  2020-01-14
+ - GPX (XML) file handling moved to Javascript
+ - Remove XML file and coordinate handling from C# side.
+ - Use Baidu Map build-in function to caculate center point and zoom level.
+
+V1.0
+ - Initial version 

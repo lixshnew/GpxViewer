@@ -14,12 +14,146 @@
 </body>
 </html>
 <script type="text/javascript">
+
+    //[start][changed to javascript] coordinate convertion algo is from blog :   https://blog.csdn.net/zyh_1988/article/details/80389411
+    var pi = 3.14159265358979324;
+    var a = 6378245.0;
+    var ee = 0.00669342162296594323;
+    var x_pi = 3.14159265358979324 * 3000.0 / 180.0;
+
+    function wgs2gcj( lat,  lon)
+    {
+        var dLat = transformLat(lon - 105.0, lat - 35.0);
+        var dLon = transformLon(lon - 105.0, lat - 35.0);
+        var radLat = lat / 180.0 * pi;
+        var magic = Math.sin(radLat);
+        magic = 1 - ee * magic * magic;
+        var sqrtMagic = Math.sqrt(magic);
+        dLat = (dLat * 180.0) / ((a * (1 - ee)) / (magic * sqrtMagic) * pi);
+        dLon = (dLon * 180.0) / (a / sqrtMagic * Math.cos(radLat) * pi);
+        var mgLat = lat + dLat;
+        var mgLon = lon + dLon;
+        var loc = new Array(); 
+		loc[0]=mgLat;
+		loc[1]=mgLon; 
+        return loc;
+    }
+    function wgs2bd( lat,  lon)
+    {
+        var wgs_gcj = wgs2gcj(lat, lon);
+        var gcj_bd = gcj2bd(wgs_gcj[0], wgs_gcj[1]);
+        return gcj_bd;
+    }
+    function gcj2bd( lat,  lon)
+    {
+        var x = lon, y = lat;
+        var z = Math.sqrt(x * x + y * y) + 0.00002 * Math.sin(y * x_pi);
+        var theta = Math.atan2(y, x) + 0.000003 * Math.cos(x * x_pi);
+        var bd_lon = z * Math.cos(theta) + 0.0065;
+        var bd_lat = z * Math.sin(theta) + 0.006;
+        var loc=new Array();
+		loc[0]=bd_lat;
+		loc[1]=bd_lon;
+		return loc;
+    }
+
+    function bd2gcj( lat,  lon)
+    {
+        var x = lon - 0.0065, y = lat - 0.006;
+        var z = Math.sqrt(x * x + y * y) - 0.00002 * Math.sin(y * x_pi);
+        var theta = Math.atan2(y, x) - 0.000003 * Math.cos(x * x_pi);
+        var gg_lon = z * Math.cos(theta);
+        var gg_lat = z * Math.sin(theta);
+		var loc=new Array();
+		loc[0]=gg_lat;
+		loc[1]=gg_lon;
+        return loc;
+    }
+    function transformLat( lat, lon)
+    {
+        var ret = -100.0 + 2.0 * lat + 3.0 * lon + 0.2 * lon * lon + 0.1 * lat * lon + 0.2 * Math.sqrt(Math.abs(lat));
+        ret += (20.0 * Math.sin(6.0 * lat * pi) + 20.0 * Math.sin(2.0 * lat * pi)) * 2.0 / 3.0;
+        ret += (20.0 * Math.sin(lon * pi) + 40.0 * Math.sin(lon / 3.0 * pi)) * 2.0 / 3.0;
+        ret += (160.0 * Math.sin(lon / 12.0 * pi) + 320 * Math.sin(lon * pi / 30.0)) * 2.0 / 3.0;
+        return ret;
+    }
+
+    function transformLon( lat,  lon)
+    {
+        var ret = 300.0 + lat + 2.0 * lon + 0.1 * lat * lat + 0.1 * lat * lon + 0.1 * Math.sqrt(Math.abs(lat));
+        ret += (20.0 * Math.sin(6.0 * lat * pi) + 20.0 * Math.sin(2.0 * lat * pi)) * 2.0 / 3.0;
+        ret += (20.0 * Math.sin(lat * pi) + 40.0 * Math.sin(lat / 3.0 * pi)) * 2.0 / 3.0;
+        ret += (150.0 * Math.sin(lat / 12.0 * pi) + 300.0 * Math.sin(lat / 30.0 * pi)) * 2.0 / 3.0;
+        return ret;
+    }
+    //[end][changed to javascript] coordinate convertion algo is from blog :   https://blog.csdn.net/zyh_1988/article/details/80389411
+
+
+
+    // Get XML content from C# Form
+    var str=window.external.GetGpxString();
+
+    // coordinate array , baidu points format
+    var mypoints = [];
+	
+    var xml=new ActiveXObject("MSXML2.DOMDocument");
+    xml.async=false;
+    xml.loadXML(str);
+
+    var gpx=xml.documentElement;
+
+    var trkpts=gpx.getElementsByTagName("trkpt");
+
+    for(var i=0;i<trkpts.length;i++)
+    {
+        var lat=trkpts[i].getAttribute("lat");
+        var lon=trkpts[i].getAttribute("lon");
+        var loc=wgs2bd(Number(lat),Number(lon));
+        mypoints.push(new BMap.Point(loc[1],loc[0]));
+    }
+          
+    // start point and end point for drawing marker
+    var startpoint = mypoints[0];
+	var endpoint = mypoints[trkpts.length-1];
+
+   /* 
+
+    // Total coordinate count
+    var total=trkpts.length;
+
+
+    // Caculate the center point 
+    var centerpoint;
+    var latmin, latmax,lonmin,lonmax;
+    
+    latmin=latmax=mypoints[0].lat;
+    lonmin=lonmax=mypoints[0].lng;
+
+    for(var i=0;i<total;i++)
+    {
+        
+        if (mypoints[i].lat>latmax) latmax=mypoints[i].lat;
+        if (mypoints[i].lat<latmin) latmin=mypoints[i].lat;
+
+        if (mypoints[i].lng>lonmax) lonmax=mypoints[i].lng;
+        if (mypoints[i].lng<lonmin) lonmin=mypoints[i].lng;
+    }
+
+    centerpoint=new BMap.Point((lonmin+lonmax)/2,(latmin+latmax)/2);
+  
+    */
+
+
+ 
+
     // 百度地图API功能
     var map = new BMap.Map("all_map");    // 创建Map实例
+    
+    var view = map.getViewport(eval(mypoints));   // 自动计算地图显示的中心点和缩放级别  
 	
+    map.centerAndZoom(view.center, view.zoom);
 
-	map.centerAndZoom(new BMap.Point(window.external.GetCenterLon(), window.external.GetCenterLat()), 10);
-   // map.centerAndZoom(new BMap.Point(116.404, 39.915), 11);  // 初始化地图,设置中心点坐标和地图级别
+    // map.centerAndZoom(new BMap.Point(116.404, 39.915), 11);  // 初始化地图,设置中心点坐标和地图级别
     //添加地图类型控件
     map.addControl(new BMap.MapTypeControl({
         mapTypes:[
@@ -28,18 +162,7 @@
         ]}));      
     map.enableScrollWheelZoom(true);     //开启鼠标滚轮缩放
 	
-	var mypoints = [];
-	var pointcnt= window.external.GetCount();
-	
-	for(var i = 0;  i  < window.external.GetCount();i++)
-	{
-	    var lat = window.external.GetLat();
-		var lon = window.external.GetLon();
-		mypoints.push(new BMap.Point(lon,lat));
-	}
 
-	var startpoint = mypoints[0];
-	var endpoint = mypoints[pointcnt-1];
 
 	var polyline = new BMap.Polyline(mypoints, {strokeColor:"blue", strokeWeight:6, strokeOpacity:0.5});   //创建折线
 	map.addOverlay(polyline);   //增加折线
@@ -64,5 +187,6 @@
 	
 	map.addOverlay(endMarker);
 
+    
    
 </script>
